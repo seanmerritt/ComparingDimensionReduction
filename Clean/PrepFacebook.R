@@ -1,0 +1,77 @@
+pacman::p_load(tidyverse, EGAnet)
+# setwd("C:/Users/seanm/Dropbox/Research/EGA_vs_PCA/Data")
+facebook <- read_delim("Raw/FacebookMetrics/dataset_Facebook.csv", delim = ";", 
+                       escape_double = FALSE, trim_ws = TRUE)
+
+facebook <- facebook %>% 
+  rename(target = `Lifetime Post Total Reach`) %>% 
+  na.omit()
+
+dat <- facebook %>% 
+  select(-target,-Type, -Category, -`Post Month`, -`Post Weekday`, -`Post Hour`, -`Total Interactions`) %>% na.omit
+
+
+
+ega.dat <- dat %>% 
+  EGA()
+
+scores <- net.scores(data = dat, A = ega.dat)
+ega_dat <- scores$std.scores
+ega_dat$target = facebook$target
+
+uva_dat <- dat %>% 
+  UVA(reduce.method = "sum")
+
+scores <- uva_dat$reduced$data
+uva_dat <- as.data.frame(scores)
+uva_dat$target <- ega_dat$target
+
+results <- prcomp(dat %>% na.omit(), scale = TRUE)
+results$rotation <- -1*results$rotation
+
+trg <- predict(results, facebook)
+trg <- data.frame(trg, facebook)
+
+
+#display principal components
+results$rotation
+
+var_explained = results$sdev^2 / sum(results$sdev^2)
+
+#create scree plot
+qplot(c(1:12), var_explained[1:12]) + 
+  geom_line() + 
+  xlab("Principal Component") + 
+  ylab("Variance Explained") +
+  ggtitle("Scree Plot") +
+  ylim(0, 0.5)
+
+pca_dat <- trg %>% 
+  select(PC1:PC2, target)
+
+ica_results <- ica(dat , nc = 12, method = "fast")
+
+qplot(c(1:12),ica_results$vafs[1:12]) + 
+  geom_line() + 
+  xlab("Independent Component") + 
+  ylab("Variance Explained") +
+  ggtitle("Scree Plot") +
+  ylim(0, 1)
+
+
+ica_results <- ica(dat, nc = 3, method = "fast")
+
+ica_dat <- data.frame(ica_results$S)
+ica_dat$target <- facebook$target
+
+write.csv(ica_dat,"Prepped/ICA/Regression/Facebook_ICA.csv")
+
+
+write.csv(pca_dat,"Prepped/PCA/Regression/Facebook_PCA.csv")
+write.csv(ega_dat,"Prepped/EGA/Regression/Facebook_EGA.csv")
+write.csv(uva_dat,"Prepped/UVA/Regression/Facebook_UVA.csv")
+
+facebook %>% 
+  select(-Type, -Category, -`Post Month`, -`Post Weekday`, -`Post Hour`, -`Total Interactions` ) %>% 
+  na.omit() %>% 
+  write.csv('Prepped/Non-reduced/Regression/Facebook_FULL.csv')

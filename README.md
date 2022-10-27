@@ -1,1 +1,5 @@
-# ComparingDimensionReduction
+# Comparing Exploratory Graphical Analyses and Unique Variable Analysis to Other Dimension Reduction Methods On Machine Learning Algorithms
+
+Developing interpretable machine learning models has become an increasingly important issue. One way in which data scientists have been able to develop interpretable models has been to use dimension reduction techniques. In this paper, we examine several dimension reduction techniques including two recent approaches developed in the network psychometrics literature called exploratory graph analysis (EGA) and unique variable analysis (UVA). We compared EGA and UVA with two other dimension reduction techniques common in the machine learning literature (principal component analysis and independent component analysis) as well as no reduction to the variables real data. We show that EGA and UVA perform as well as the other reduction techniques or no reduction. Consistent with previous literature, we show that dimension reduction can decrease, increase, or provide the same accuracy as no reduction of variables. Our tentative results find that dimension reduction tends to lead to better performance when used for classification tasks.
+
+https://arxiv.org/abs/2210.13230
